@@ -68,7 +68,7 @@ namespace h3ko.SimpleMailbot.Web.Controllers
 
         // POST api/smtp
         [HttpPost(Name=PostEmail)]
-        public async Task<IActionResult> Post([FromQuery]string from, [FromQuery]string to, [FromQuery]string cc, [FromQuery]string bcc, [FromHeader(Name = "api-token")]string token, [FromQuery]string subject, [FromBody]string body, bool isHtmlBody)
+        public async Task<IActionResult> Post([FromQuery]string from, [FromQuery]string to, [FromQuery]string cc, [FromQuery]string bcc, [FromHeader(Name = "api-token")]string headerToken, [FromQuery(Name = "api-token")]string queryToken, [FromQuery]string subject, [FromBody]string body, bool isHtmlBody)
         {
             MailAddress fromMail;
             MailAddress[] tos;
@@ -76,10 +76,15 @@ namespace h3ko.SimpleMailbot.Web.Controllers
             MailAddress[] bccs;
             try
             {
+                var token = !string.IsNullOrEmpty(headerToken) ? headerToken : queryToken;
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest("No api-token found in HTTP-Header or in url query string");
+
+
                 var currentTokenconfiguration = _tokenEmailConfigs.FirstOrDefault(x => x.Token == token);
 
                 if (currentTokenconfiguration == null)
-                    return BadRequest("Not matching configuration found for this api token");
+                    return BadRequest($"Not matching configuration found for this api token: {token}");
 
                 //replace arguments with values from configuration
                 from = !string.IsNullOrEmpty(currentTokenconfiguration.From) ? currentTokenconfiguration.From : from;
@@ -89,7 +94,7 @@ namespace h3ko.SimpleMailbot.Web.Controllers
                 subject = !string.IsNullOrEmpty(currentTokenconfiguration.Subject) ? currentTokenconfiguration.Subject : subject;
                 body = !string.IsNullOrEmpty(currentTokenconfiguration.Body) ? currentTokenconfiguration.Body : body;
                 isHtmlBody = isHtmlBody || Request.ContentType.ToLower().Contains("html");
-
+                
                 fromMail = from == null ? null : new MailAddress(from);
                 tos = to.ToMailAddresses();
                 ccs = cc.ToMailAddresses();
