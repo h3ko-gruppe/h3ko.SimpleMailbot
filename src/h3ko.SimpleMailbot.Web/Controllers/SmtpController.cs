@@ -84,7 +84,7 @@ namespace h3ko.SimpleMailbot.Web.Controllers
                 var currentTokenconfiguration = _tokenEmailConfigs.FirstOrDefault(x => x.Token == token);
 
                 if (currentTokenconfiguration == null)
-                    return BadRequest($"Not matching configuration found for this api token: {token}");
+                    return BadRequest($"No matching configuration found for this api-token: {token}");
 
                 //replace arguments with values from configuration
                 from = !string.IsNullOrEmpty(currentTokenconfiguration.From) ? currentTokenconfiguration.From : from;
