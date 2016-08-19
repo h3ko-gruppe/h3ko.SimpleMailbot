@@ -1,10 +1,11 @@
-﻿using System.IO;
-using System.Net;
-using System.Net.Mail;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using h3ko.SimpleMailbot.Web.Config;
 using Microsoft.Extensions.Options;
-using NuGet.Packaging;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
+using System;
+using h3ko.SimpleMailbot.Web.Extensions;
 
 namespace h3ko.SimpleMailbot.Web.Services
 {
@@ -17,32 +18,42 @@ namespace h3ko.SimpleMailbot.Web.Services
             _smtpSetings = smtpSetings.Value;
         }
 
-        public Task SendMail(MailAddress from, string subject, string body, MailAddress[] to, MailAddress[] cc = null, MailAddress[] bcc = null, bool isHtmlBody = false)
+        public async Task SendMail(MailboxAddress[] from, string subject, string body, MailboxAddress[] to, MailboxAddress[] cc = null, MailboxAddress[] bcc = null, bool isHtmlBody = false)
         {
-            var fromEmail = from ?? new MailAddress(_smtpSetings.DefaultFrom); ;
-            var mail = new MailMessage
-            {
-                Subject = subject,
-                Body = body,
-                // Attachments = attachments.ToAttachments();
-                IsBodyHtml = isHtmlBody,
-                From = fromEmail
-            };
-            mail.To.AddRange(to);
-            mail.CC.AddRange(cc);
-            mail.Bcc.AddRange(bcc);
+            
+            to = to ?? new MailboxAddress[0];
+            cc = cc ?? new MailboxAddress[0];
+            bcc = bcc ?? new MailboxAddress[0];
 
-            var client = new SmtpClient
+            var fromEmail = from ?? _smtpSetings.DefaultFrom.ToMailBoxAddresses();
+            
+            if (from == null || from.Length == 0)
+                throw new NotSupportedException("The email needs at least one sender");
+
+            if (to == null || to.Length == 0)
+                throw new NotSupportedException("The email needs at least one recipient");
+
+            var message = new MimeMessage ();
+            message.From.AddRange (from);
+            message.To.AddRange (to);
+            message.Cc.AddRange(cc);
+            message.Bcc.AddRange(bcc);
+            message.Subject = subject;
+
+            var textPartType = isHtmlBody ? "html" : "plain";
+            message.Body = new TextPart (textPartType) 
             {
-                Port = _smtpSetings.Port,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(_smtpSetings.Username, _smtpSetings.Password),
-                EnableSsl = _smtpSetings.UseTls,
-                Host = _smtpSetings.Host
+                Text = body
             };
 
-            return client.SendMailAsync(mail);
+            if (_smtpSetings.IsEnabled){
+                using (var client = new SmtpClient ()) {
+                    await client.ConnectAsync (_smtpSetings.Host, _smtpSetings.Port, SecureSocketOptions.Auto);
+                    await client.AuthenticateAsync (_smtpSetings.Username, _smtpSetings.Password);
+                    await client.SendAsync (message);
+                    await client.DisconnectAsync (true);
+                }
+            }
         }
     }
 }

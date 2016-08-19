@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+
 using System.Linq;
-using System.Net.Mail;
-using System.ServiceModel.Configuration;
 using System.Threading.Tasks;
 using h3ko.SimpleMailbot.Web.Config;
 using h3ko.SimpleMailbot.Web.Extensions;
 using h3ko.SimpleMailbot.Web.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using NuGet.ProjectModel;
-using NuGet.Protocol.Core.v3;
+using MimeKit;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -70,10 +66,10 @@ namespace h3ko.SimpleMailbot.Web.Controllers
         [HttpPost(Name=PostEmail)]
         public async Task<IActionResult> Post([FromQuery]string from, [FromQuery]string to, [FromQuery]string cc, [FromQuery]string bcc, [FromHeader(Name = "api-token")]string headerToken, [FromQuery(Name = "api-token")]string queryToken, [FromQuery]string subject, [FromBody]string body, bool isHtmlBody)
         {
-            MailAddress fromMail;
-            MailAddress[] tos;
-            MailAddress[] ccs;
-            MailAddress[] bccs;
+            MailboxAddress[] froms;
+            MailboxAddress[] tos;
+            MailboxAddress[] ccs;
+            MailboxAddress[] bccs;
             try
             {
                 var token = !string.IsNullOrEmpty(headerToken) ? headerToken : queryToken;
@@ -95,17 +91,17 @@ namespace h3ko.SimpleMailbot.Web.Controllers
                 body = !string.IsNullOrEmpty(currentTokenconfiguration.Body) ? currentTokenconfiguration.Body : body;
                 isHtmlBody = isHtmlBody || Request.ContentType.ToLower().Contains("html");
                 
-                fromMail = from == null ? null : new MailAddress(from);
-                tos = to.ToMailAddresses();
-                ccs = cc.ToMailAddresses();
-                bccs = bcc.ToMailAddresses();
+                froms = from.ToMailBoxAddresses();
+                tos = to.ToMailBoxAddresses();
+                ccs = cc.ToMailBoxAddresses();
+                bccs = bcc.ToMailBoxAddresses();
                
             }
             catch (Exception ex)
             {
                 return BadRequest(ex);
             }
-            await _emailService.SendMail(fromMail, subject, body, tos, ccs, bccs, isHtmlBody);
+            await _emailService.SendMail(froms, subject, body, tos, ccs, bccs, isHtmlBody);
             return Ok();
         }
 

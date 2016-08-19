@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using h3ko.SimpleMailbot.Web.Config;
 using h3ko.SimpleMailbot.Web.Formatters;
 using h3ko.SimpleMailbot.Web.Services;

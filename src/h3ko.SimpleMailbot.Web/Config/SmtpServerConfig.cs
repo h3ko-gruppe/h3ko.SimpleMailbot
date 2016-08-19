@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Threading.Tasks;
-
-namespace h3ko.SimpleMailbot.Web.Config
+﻿namespace h3ko.SimpleMailbot.Web.Config
 {
     public class SmtpServerConfig
     {
@@ -14,6 +8,7 @@ namespace h3ko.SimpleMailbot.Web.Config
         public string Password { get; set; }
         public bool UseTls { get; set; }
         public string DefaultFrom { get; set; }
+        public bool IsEnabled { get; set; }
        
     }
 }
