@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+
+[assembly:AssemblyCompany("h3ko GmbH")]
+[assembly:AssemblyCopyrightAttribute("2016 © Rico Herlt")]
 
 namespace h3ko.SimpleMailbot.Web.Controllers
 {
@@ -11,18 +15,9 @@ namespace h3ko.SimpleMailbot.Web.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
-
             return View();
         }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
+        
         public IActionResult Error()
         {
             return View();

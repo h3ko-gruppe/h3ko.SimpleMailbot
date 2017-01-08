@@ -1,7 +1,21 @@
-﻿@{
+﻿@using h3ko.SimpleMailbot.Web.Extensions;
+@{
     ViewData["Title"] = "About";
+    ViewData["Message"] = "Hello. Nice to meet you :)";
+    ViewData["AssemblyName"] = typeof(h3ko.SimpleMailbot.Web.Program).GetAssemblyNameString();
+    ViewData["AssemblyVersion"] = typeof(h3ko.SimpleMailbot.Web.Program).GetAssemblyVersion();
+    ViewData["AssemblyInformationalVersion"] = typeof(h3ko.SimpleMailbot.Web.Program).GetAssemblyInformationalVersion();
+    ViewData["AssemblyCopyRight"] = typeof(h3ko.SimpleMailbot.Web.Program).GetAssemblyCopyright();
+    ViewData["AssemblyCompany"] = typeof(h3ko.SimpleMailbot.Web.Program).GetAssemblyCompany();
 }
 <h2>@ViewData["Title"].</h2>
 <h3>@ViewData["Message"]</h3>
 
-<p>Use this area to provide additional information.</p>
+<p>@ViewData["AssemblyName"] @ViewData["AssemblyVersion"]</p>            
+<p><a href="http://semver.org/" target="_blank">SemVersion:</a> @ViewData["AssemblyInformationalVersion"]</p>
+<p>
+    <strong>Author website:</strong> <a href="http://ricoherlt.com" target="_blank">http://ricoherlt.com</a><br />
+    <strong>Github repository:</strong> <a href="https://github.com/rherlt/h3ko.SimpleMailbot" target="_blank">https://github.com/rherlt/h3ko.SimpleMailbot</a><br />
+    <strong>CopyRight:</strong>  @ViewData["AssemblyCopyRight"]<br />
+    <strong>Company:</strong>  @ViewData["AssemblyCompany"]<br />
+</p>
